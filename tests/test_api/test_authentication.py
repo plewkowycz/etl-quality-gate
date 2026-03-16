@@ -1,6 +1,5 @@
 """Test authentication scenarios for CoinGecko API."""
 
-
 from src.api import CoinGeckoClient
 
 

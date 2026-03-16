@@ -80,9 +80,7 @@ class TestDatabaseCRUD:
         clean_db_manager.create_asset(test_asset_data)
 
         # Update price
-        updated = clean_db_manager.update_asset(
-            test_asset_data["id"], current_price=55000.0
-        )
+        updated = clean_db_manager.update_asset(test_asset_data["id"], current_price=55000.0)
         assert updated is not None
         assert updated.current_price == 55000.0
         assert updated.symbol == test_asset_data["symbol"]  # Other fields unchanged
