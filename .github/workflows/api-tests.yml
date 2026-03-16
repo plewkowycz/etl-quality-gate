@@ -19,6 +19,13 @@ on:
       - 'docker-compose.api.yml'
       - 'pyproject.toml'
       - '.env.example'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running API tests'
+        required: false
+        default: 'Manual API test run'
+        type: string
 
 jobs:
   lint:

@@ -505,16 +505,17 @@ This framework employs **multi-layered validation** to ensure comprehensive qual
 
 ### CI/CD Pipeline Strategy
 
-The project uses two separate GitHub Actions workflows:
+The project uses two separate GitHub Actions workflows, both supporting manual execution:
 
 #### API Tests Workflow (`api-tests.yml`)
 - **Automatic Execution**: Runs on every push to `main` and `develop` branches
+- **Manual Execution**: Can be triggered manually via GitHub Actions UI
 - **Purpose**: Fast feedback for API functionality and code quality
 - **Scope**: Tests API endpoints, authentication, and basic functionality
 - **Artifacts**: Uploads HTML test reports for review
 
 #### ELT Pipeline Workflow (`elt-pipeline.yml`)
-- **Manual Execution**: Runs only when manually triggered via GitHub Actions UI
+- **Manual Execution Only**: Runs only when manually triggered via GitHub Actions UI
 - **Purpose**: Comprehensive end-to-end testing with database integration
 - **Scope**: Full ELT pipeline validation with PostgreSQL
 - **Rationale**: Manual execution prevents excessive CI/CD resource usage due to:
@@ -522,16 +523,20 @@ The project uses two separate GitHub Actions workflows:
   - Database setup/teardown overhead
   - Resource-intensive operations
 
-#### How to Run ELT Pipeline Tests Manually
+#### How to Run Workflows Manually
 
 1. **Via GitHub Actions UI**:
    - Go to: https://github.com/plewkowycz/etl-quality-gate/actions
-   - Select "ELT Pipeline" workflow
+   - Select workflow: "API Tests" or "ELT Pipeline"
    - Click "Run workflow" with optional reason
    - Monitor progress and download HTML report
 
 2. **Via Local Docker**:
    ```bash
+   # API Tests
+   docker compose -f docker-compose.api.yml up --build --exit-code-from api_tests
+   
+   # ELT Pipeline Tests
    docker compose -f docker-compose.elt.yml up --build --exit-code-from elt_tests
    ```
 
