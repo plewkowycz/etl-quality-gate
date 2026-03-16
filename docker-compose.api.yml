@@ -1,0 +1,12 @@
+# Docker Compose for API tests (Unified Structure)
+
+services:
+  api_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./reports/api:/app/reports
+    command: ["pytest", "tests/test_api/", "-v", "--html=reports/api_report.html", "--self-contained-html"]

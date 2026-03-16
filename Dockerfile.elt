@@ -1,0 +1,43 @@
+# Dockerfile for ELT pipeline (Unified Structure)
+
+# Stage 1: Install Dependencies
+FROM python:3.11-slim AS deps
+
+WORKDIR /app
+
+# Install build dependencies for psycopg2-binary
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies
+COPY pyproject.toml ./
+RUN pip install -e .
+
+# Stage 2: Run Tests
+FROM python:3.11-slim AS test_runner
+
+WORKDIR /app
+
+# Install runtime dependencies for psycopg2-binary
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed packages from deps stage
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
+
+# Copy source code
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY .env.example ./.env.example
+
+# Set environment variables for tests
+ENV PYTHONPATH=/app
+ENV DB_URL=postgresql://postgres:admin@postgres:5432/coingecko_db
+
+# Create reports directory and run ELT tests with HTML report
+RUN mkdir -p /app/reports
+CMD ["pytest", "tests/test_elt/", "-v", "--html=reports/elt_report.html", "--self-contained-html"]

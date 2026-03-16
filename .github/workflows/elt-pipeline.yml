@@ -1,0 +1,54 @@
+name: ELT Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Dockerfile.elt'
+      - 'docker-compose.elt.yml'
+      - 'pyproject.toml'
+      - '.env.example'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Dockerfile.elt'
+      - 'docker-compose.elt.yml'
+      - 'pyproject.toml'
+      - '.env.example'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff linter
+        run: ruff check src/ tests/
+      - name: Run Ruff format check
+        run: ruff format --check src/ tests/
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Run ELT Pipeline Tests
+        run: docker compose -f docker-compose.elt.yml up --build --exit-code-from elt_tests
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elt-pipeline-report
+          path: reports/elt/elt_report.html
+          retention-days: 7

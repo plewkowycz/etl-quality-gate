@@ -1,0 +1,27 @@
+# Dockerfile for API tests (Unified Structure)
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy pyproject.toml and install dependencies
+COPY pyproject.toml ./
+RUN pip install -e .
+
+# Copy source code
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY .env.example ./.env.example
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Create reports directory and run API tests with HTML report
+RUN mkdir -p /app/reports
+CMD ["pytest", "tests/test_api/", "-v", "--html=reports/api_report.html", "--self-contained-html"]

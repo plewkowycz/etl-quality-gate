@@ -1,0 +1,35 @@
+# Docker Compose for ELT pipeline (Unified Structure)
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: coincap_db_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: coincap_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coincap_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elt_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.elt
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: postgresql://postgres:admin@postgres:5432/coincap_db
+    volumes:
+      - ./reports/elt:/app/reports
+    command: ["pytest", "tests/test_elt/", "-v", "--html=reports/elt_report.html", "--self-contained-html"]
+
+volumes:
+  postgres_data:
