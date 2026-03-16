@@ -18,8 +18,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install Ruff
-        run: pip install ruff
+          cache: 'pip'
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Run Ruff linter
         run: ruff check src/ tests/
       - name: Run Ruff format check
@@ -32,6 +38,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('**/Dockerfile.elt', '**/docker-compose.elt.yml', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Run ELT Pipeline Tests
         run: docker compose -f docker-compose.elt.yml up --build --exit-code-from elt_tests
       - name: Upload HTML Report

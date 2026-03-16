@@ -22,6 +22,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.elt
+      cache:
+        target: elt-tests-cache
     depends_on:
       postgres:
         condition: service_healthy
