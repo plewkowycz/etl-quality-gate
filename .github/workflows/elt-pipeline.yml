@@ -1,24 +1,13 @@
 name: ELT Pipeline
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Dockerfile.elt'
-      - 'docker-compose.elt.yml'
-      - 'pyproject.toml'
-      - '.env.example'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Dockerfile.elt'
-      - 'docker-compose.elt.yml'
-      - 'pyproject.toml'
-      - '.env.example'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running ELT pipeline tests'
+        required: false
+        default: 'Manual ELT pipeline test run'
+        type: string
 
 jobs:
   lint:

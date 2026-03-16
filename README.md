@@ -503,6 +503,38 @@ This framework employs **multi-layered validation** to ensure comprehensive qual
 - **Linting**: Ruff
 - **CI/CD**: GitHub Actions with multi-stage Docker builds and artifact upload
 
+### CI/CD Pipeline Strategy
+
+The project uses two separate GitHub Actions workflows:
+
+#### API Tests Workflow (`api-tests.yml`)
+- **Automatic Execution**: Runs on every push to `main` and `develop` branches
+- **Purpose**: Fast feedback for API functionality and code quality
+- **Scope**: Tests API endpoints, authentication, and basic functionality
+- **Artifacts**: Uploads HTML test reports for review
+
+#### ELT Pipeline Workflow (`elt-pipeline.yml`)
+- **Manual Execution**: Runs only when manually triggered via GitHub Actions UI
+- **Purpose**: Comprehensive end-to-end testing with database integration
+- **Scope**: Full ELT pipeline validation with PostgreSQL
+- **Rationale**: Manual execution prevents excessive CI/CD resource usage due to:
+  - Longer execution time (rate limiting from external API)
+  - Database setup/teardown overhead
+  - Resource-intensive operations
+
+#### How to Run ELT Pipeline Tests Manually
+
+1. **Via GitHub Actions UI**:
+   - Go to: https://github.com/plewkowycz/etl-quality-gate/actions
+   - Select "ELT Pipeline" workflow
+   - Click "Run workflow" with optional reason
+   - Monitor progress and download HTML report
+
+2. **Via Local Docker**:
+   ```bash
+   docker compose -f docker-compose.elt.yml up --build --exit-code-from elt_tests
+   ```
+
 ## Troubleshooting
 
 ### Common Issues
