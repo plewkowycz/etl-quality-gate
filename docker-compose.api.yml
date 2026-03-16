@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-      cache:
-        target: api-tests-cache
+      cache_from:
+        - api-tests-cache
     environment:
       - PYTHONPATH=/app
     volumes:
